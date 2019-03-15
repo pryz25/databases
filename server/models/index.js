@@ -1,49 +1,54 @@
 var db = require('../db');
+// var checkifUserExists = function (req, res, cb) {
+//   var query = `
+//    SELECT id from users where username="${res.username}
+//   `;
+//   db.connection.query(query, (err, rows, fields) {
+//     if (err) {
+//       addUsertoDb(req, res, cb);
+//     } else {
+//       cb(req, res);
+//     }
+//   });
+// }
+
+// var addUsertoDB = function();
+
+// var add 
 
 module.exports = {
   messages: {
-    get: () => {
-     
-      db.connection((err) => {
-        let result = [];
-        if (err) throw err;
-        db.query('SELECT * FROM messages;', (err, rows, fields) => {
-          if (err) throw err;
-          console.dir(' CONSOLE DIRECTORY CONSOLE:', res);
-          for (row in rows) {
-            result.push({
-              messages: row.message_text
-            });
-          } 
-        });
-      });
-    }, // a function which produces all the messages
-    post: (text) => {
-      console.dir(' CONSOLE DIRECTORY CONSOLE:', res);
-        db.connection((err) => {
-          if (err) throw err;
-          db.query('INSERT INTO messages (name_id, room_id, message_text) VALUES (, , );', (err, res) => {
-            if (err) throw err;
-            console.dir(' CONSOLE DIRECTORY CONSOLE:', res);
+    get: (callback) => {
+    db.query(`SELECT messages.id, users.username, rooms.room_name, messages.message_text FROM messages
+                LEFT JOIN users ON messages.name_id = users.id
+                LEFT JOIN rooms ON messages.room_id = rooms.id;`, (err, results) => {
+          callback(err, results);
           });
+    }, // a function which produces all the messages
+    post: (params, callback) => {
+      db.query(`INSERT INTO messages(name_id, room_id, message_text) 
+                  VALUES ((SELECT id FROM users WHERE username = ${params.username};), (SELECT id FROM rooms WHERE room_name = ${params.roomname};), ${params.messages});`, (err, res) => {
+        callback(err, res);
+      });
+    }
+  },
+     // a function which can be used to insert a message into the database
+  
+
+  users: {
+    // Ditto as above.
+    get: (callback) => {
+      // callback(<h1>'TEST FONT</h1>);
+      db.query('SELECT username FROM users;', (err, res) => {
+          callback(err, res);
         });
+      },
+    post: (params, callback) => {
+        db.query(`INSERT INTO users(username)
+                    VALUES (?)`, params, (err, results) => {
+                      callback(err, results);
+                    })
       }
     }
-     // a function which can be used to insert a message into the database
-  };
-
-  // users: {
-  //   // Ditto as above.
-  //   get: () => {
-  //     db.connection((err) => {
-  //       if (err) throw err;
-  //       db.query('SELECT * FROM users;', (err, res) => {
-  //         if (err) throw err;
-  //         console.dir(' CONSOLE DIRECTORY CONSOLE:', res);
-  //       });
-  //     });
-  //   },
-  //   post: function () {}
-  // }
-// };
+};
 

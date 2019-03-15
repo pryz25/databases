@@ -27,6 +27,8 @@ describe('Persistent Node Chat Server', function() {
     dbConnection.end();
   });
 
+  
+
   it('Should insert posted messages to the DB', function(done) {
     // Post the user to the chat server.
     request({
@@ -67,13 +69,18 @@ describe('Persistent Node Chat Server', function() {
 
   it('Should output all messages from the DB', function(done) {
     // Let's insert a message into the db
-       var queryString = "";
-       var queryArgs = [];
+       var queryString = "INSERT INTO messages(message_text,) VALUES (?)";
+       var queryArgs = ['Men like you can never change!'];
     // TODO - The exact query string and query args to use
     // here depend on the schema you design, so I'll leave
     // them up to you. */
-
-    dbConnection.query(queryString, queryArgs, function(err) {
+    dbConnection.query('INSERT INTO rooms(room_name) VALUE ("new")', function(err) {
+      if (err) { throw err; }})
+    dbConnection.query('INSERT INTO users(username) VALUE ("new")', queryArgs, function(err) {
+      if (err) { throw err; }})
+    dbConnection.query(`SELECT messages.id, users.username, rooms.room_name, messages.message_text FROM messages 
+    LEFT JOIN users ON messages.name_id = users.id 
+    LEFT JOIN rooms ON messages.room_id = rooms.id;`, queryArgs, function(err) {
       if (err) { throw err; }
 
       // Now query the Node chat server and see if it returns
@@ -81,7 +88,7 @@ describe('Persistent Node Chat Server', function() {
       request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
         var messageLog = JSON.parse(body);
         expect(messageLog[0].message).to.equal('Men like you can never change!');
-        expect(messageLog[0].roomname).to.equal('main');
+        expect(messageLog[0].roomname).to.equal('new');
         done();
       });
     });
